@@ -1,11 +1,12 @@
 package Practice;
 
 import lombok.extern.log4j.Log4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -17,7 +18,12 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import page_object.MainPage;
 
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +34,7 @@ public class BrowserTest {
     private final String LOCAL_FILE = "file://" + this.getClass().getResource("/elements.html").getPath();
 
     ChromeDriver driver;
+//    WebDriver driver;
     MainPage mainPage;
 
     WebDriverWait wait;
@@ -39,11 +46,15 @@ public class BrowserTest {
     }
 
     @BeforeMethod(alwaysRun = true)
-        public void openBrowser() {
+        public void openBrowser() throws MalformedURLException {
         log.info("Initializing Chromedriver");
             driver = new ChromeDriver();
+        ChromeOptions options = new ChromeOptions();
+        options.setCapability("platformName", "WINDOWS");
+//        driver = new RemoteWebDriver(new URL("http://192.168.1.112:4444/"), options); //Selenium Grid
+//        driver = new RemoteWebDriver(new URL("https://oauth-laura.walter.ca-4382f:33897d44xxxxxx@ondemand.eu-central-1.saucelabs.com:443/wd/hub"), options); //take URL from saucelabs
         mainPage = new MainPage(driver);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 //            driver.get(GOOGLE_URL);
 //            driver.get(LOCAL_FILE);
         }
@@ -83,7 +94,7 @@ public class BrowserTest {
 
     @Test
     public  void pageObject() {
-        driver.get((LOCAL_FILE));
+        driver.get(LOCAL_FILE);
 //        mainPage = new MainPage(driver); //this row can be deleted if add it to @BeforeMethod
         mainPage.setFirstNameField("John");
         System.out.println();
@@ -91,7 +102,7 @@ public class BrowserTest {
 
     @Test
     public void testElements() {
-        driver.get((LOCAL_FILE));
+        driver.get(LOCAL_FILE);
         mainPage.getFirstNameField().sendKeys("John");
         mainPage.selectStudentCheckBox(); //same as next one
 //        mainPage.setStudentCheckBox();
@@ -109,11 +120,51 @@ public class BrowserTest {
         Assert.assertEquals(driver.findElement(By.xpath("/html/body/form/table/tbody/tr[7]/td[1]")).getText(), "Universitātes"); //checking if element exists
     }
 
+
+    @Test
+    public void testBrowserTab() {
+        driver.get(LOCAL_FILE);
+        mainPage.getLinkedinURL().click();
+        List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+        driver.switchTo().window(tabs.get(1));
+        driver.close();
+        driver.switchTo().window(tabs.get(0));
+        tabs = new ArrayList<>(driver.getWindowHandles());
+        driver.quit();
+    }
+//document.getElementsByClassName('footer__menuLink')[0].scrollIntoView(true)
+
+    @Test
+    public void testJsExecutor() {
+        driver.get("https://www.lu.lv/");
+        WebElement kontakti = driver.findElement(By.linkText("Kontakti"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true)", kontakti);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click()", kontakti);
+        driver.quit();
+    }
+
+    @Test
+    public void testActions() {
+        driver.get(LOCAL_FILE);
+        mainPage.getTextArea().click();
+        Actions actions = new Actions(driver);
+//        actions.moveToElement(mainPage.getTextArea()).keyDown(Keys.CONTROL).sendKeys("a").keyUp(Keys.CONTROL).perform();
+//        actions.moveToElement(mainPage.getTextArea())
+//                .keyDown(Keys.CONTROL).sendKeys("a").keyUp(Keys.CONTROL)
+//                .keyDown(Keys.CONTROL).sendKeys("c").keyUp(Keys.CONTROL)
+//                .keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL)
+//                .keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
+        actions.moveToElement(mainPage.getTextArea())
+                .keyDown(Keys.CONTROL).sendKeys("acvv").keyUp(Keys.CONTROL).perform();
+        driver.quit();
+    }
+
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
         log.info("Closing Chromedriver");
         log.debug("DEBUG: Closing");
 //        driver.close();
+//        driver.quit();
     }
 
 }

@@ -24,6 +24,18 @@ public class MainPage {
     private final By studentCheckBox = By.id("studentID"); // or = By.xpath("//input[@id=studentID and @type='checkbox']);
     private final By universities = By.id("universitiesID"); //or = By.name("universities");
     private final By javaRadioButton = By.id("javaID");
+//    private final By linkedinURL = By.linkText("LinkedIn");
+    private final By linkedinURL = By.xpath("/html/body/form/table/tbody/tr[10]/td/a");
+//    private final By textArea = By.id("aboutMeID");
+    private final By textArea = By.xpath("//*[@id=\"aboutMeID\"]");
+
+    public WebElement getTextArea() {
+        return driver.findElement(textArea);
+    }
+
+    public  WebElement getLinkedinURL() {
+        return driver.findElement(linkedinURL);
+    }
 
 
     public WebElement getCheckResult() {
