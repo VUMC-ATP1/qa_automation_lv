@@ -19,6 +19,12 @@ public class CheckoutPage {
     private final By nextButton = By.id("continue");
 
 
+    public void checkoutPageFillIn(String name, String surname, String postalCode) {
+        driver.findElement(firstName).sendKeys(name);
+        driver.findElement(lastName).sendKeys(surname);
+        driver.findElement(zipCode).sendKeys(postalCode);
+    }
+
     public WebElement getFirstName() {
         return driver.findElement(firstName);
     }
